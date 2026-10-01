@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Directorio de personajes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="top"><h1>Directorio de personajes</h1><nav id="nav"></nav></header>
+  <main>
+    <section id="vista-login" class="caja" hidden>
+      <h2 id="login-titulo" class="etiqueta">Iniciar sesión</h2>
+      <form id="form-login">
+        <div id="campo-nombre" hidden><label for="l-nombre">Nombre</label><input id="l-nombre"></div>
+        <label for="l-correo">Correo</label><input id="l-correo" type="email" required>
+        <label for="l-pass">Contraseña</label><input id="l-pass" type="password" minlength="6" required>
+        <p id="login-error" class="error"></p>
+        <button class="chip activo" id="login-btn">ENTRAR</button>
+      </form>
+      <button class="link" id="cambiar-modo" type="button">¿No tienes cuenta? Regístrate</button>
+      <a class="link" href="index.html" style="display:block;text-decoration:none">← Volver sin iniciar sesión</a>
+    </section>
+
+    <section id="vista-grupos" hidden>
+      <div class="fila">
+        <span class="etiqueta">Grupos</span>
+        <button class="chip" id="btn-nuevo-grupo" hidden>+ NUEVO GRUPO</button>
+      </div>
+      <p id="msg" class="msg"></p>
+      <div id="grupos" class="grid"></div>
+    </section>
+  </main>
+
+  <dialog id="dlg-grupo">
+    <h2>Nuevo grupo</h2>
+    <form id="form-grupo">
+      <label for="g-nombre">Nombre</label><input id="g-nombre" required>
+      <label for="g-desc">Descripción</label><textarea id="g-desc"></textarea>
+      <p id="grupo-error" class="error"></p>
+      <div class="botones"><button class="chip activo">CREAR</button><button type="button" class="chip" data-cerrar>CANCELAR</button></div>
+    </form>
+  </dialog>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/index.js"></script>
+</body>
+</html>

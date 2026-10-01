@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Grupo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="top"><h1 id="titulo">Directorio de personajes</h1><nav id="nav"></nav></header>
+  <main>
+    <p id="descripcion" class="desc"></p>
+    <div class="fila">
+      <span class="etiqueta">Universo</span>
+      <div id="chips" class="chips"></div>
+    </div>
+    <div class="fila">
+      <button class="chip" id="btn-nuevo" hidden>+ NUEVO PERSONAJE</button>
+      <button class="chip" id="btn-miembros" hidden>ADMINISTRAR MIEMBROS</button>
+    </div>
+    <section id="panel-admin" class="panel" hidden>
+      <h3 class="sub" id="sub-miembros">Miembros</h3>
+      <ul id="miembros" class="miembros"></ul>
+      <h3 class="sub">Agregar usuarios</h3>
+      <input id="buscar" placeholder="Buscar por nombre...">
+      <ul id="disponibles" class="miembros"></ul>
+    </section>
+    <p id="msg" class="msg"></p>
+    <div id="grid" class="grid"></div>
+  </main>
+
+  <dialog id="dlg-detalle" class="amplio"><div id="detalle" class="detalle"></div></dialog>
+
+  <dialog id="dlg-personaje">
+    <h2 id="form-titulo"></h2>
+    <form id="form-personaje">
+      <label for="f-nombre">Nombre</label><input id="f-nombre" required>
+      <label>Imágenes (enlaces; la primera es la portada)</label>
+      <div id="f-imagenes"></div>
+      <button type="button" class="chip" id="btn-add-img">+ AÑADIR IMAGEN</button>
+      <label for="f-descripcion">Descripción</label><textarea id="f-descripcion"></textarea>
+      <label for="f-universo">Universo de origen</label><select id="f-universo"></select>
+      <div id="wrap-nuevo" hidden><label for="f-nuevo">Nombre del nuevo universo</label><input id="f-nuevo"></div>
+      <div id="wrap-jugador" hidden><label for="f-jugador">Jugador asignado</label><select id="f-jugador"></select></div>
+      <p id="form-error" class="error"></p>
+      <div class="botones"><button class="chip activo">GUARDAR</button><button type="button" class="chip" data-cerrar>CANCELAR</button></div>
+    </form>
+  </dialog>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/grupo.js"></script>
+</body>
+</html>

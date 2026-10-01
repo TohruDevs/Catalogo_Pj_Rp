@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Administración</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="top"><h1>Administración</h1><nav id="nav"></nav></header>
+  <main>
+    <p id="msg" class="msg"></p>
+    <div class="admin">
+      <aside>
+        <span class="etiqueta">Grupos</span>
+        <div id="lista-grupos" class="lista-grupos"></div>
+      </aside>
+      <section>
+        <span class="etiqueta" id="titulo-grupo"></span>
+        <h3 class="sub" id="sub-miembros">Miembros</h3>
+        <ul id="miembros" class="miembros"></ul>
+        <h3 class="sub">Agregar usuarios</h3>
+        <input id="buscar" placeholder="Buscar por nombre o correo...">
+        <ul id="disponibles" class="miembros"></ul>
+      </section>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
