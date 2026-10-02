@@ -15,9 +15,12 @@
       <span class="etiqueta">Universo</span>
       <div id="chips" class="chips"></div>
     </div>
+    <input id="busqueda" class="busqueda" type="search" placeholder="Buscar personaje por nombre...">
     <div class="fila">
       <button class="chip" id="btn-nuevo" hidden>+ NUEVO PERSONAJE</button>
       <button class="chip" id="btn-miembros" hidden>ADMINISTRAR MIEMBROS</button>
+      <button class="chip" id="btn-editar-grupo" hidden>EDITAR GRUPO</button>
+      <button class="chip peligro" id="btn-eliminar-grupo" hidden>ELIMINAR GRUPO</button>
     </div>
     <section id="panel-admin" class="panel" hidden>
       <h3 class="sub" id="sub-miembros">Miembros</h3>
@@ -29,6 +32,16 @@
     <p id="msg" class="msg"></p>
     <div id="grid" class="grid"></div>
   </main>
+
+  <dialog id="dlg-grupo">
+    <h2>Editar grupo</h2>
+    <form id="form-grupo">
+      <label for="g-nombre">Nombre</label><input id="g-nombre" required>
+      <label for="g-desc">Descripción</label><textarea id="g-desc"></textarea>
+      <p id="grupo-error" class="error"></p>
+      <div class="botones"><button class="chip activo">GUARDAR</button><button type="button" class="chip" data-cerrar>CANCELAR</button></div>
+    </form>
+  </dialog>
 
   <dialog id="dlg-detalle" class="amplio"><div id="detalle" class="detalle"></div></dialog>
 
@@ -48,6 +61,7 @@
     </form>
   </dialog>
 
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
   <script src="js/config.js"></script>
   <script src="js/api.js"></script>
   <script src="js/grupo.js"></script>

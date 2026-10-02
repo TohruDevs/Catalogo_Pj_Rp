@@ -3,19 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Solicitudes</title>
+  <title>Papelera</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header class="top"><h1>Solicitudes de personajes</h1><nav id="nav"></nav></header>
+  <header class="top"><h1>Papelera</h1><nav id="nav"></nav></header>
   <main>
     <p id="msg" class="msg"></p>
-    <div id="grid" class="grid"></div>
+    <h3 class="sub">Grupos eliminados</h3>
+    <ul id="lista-grupos" class="miembros"></ul>
+    <h3 class="sub">Personajes eliminados</h3>
+    <ul id="lista-personajes" class="miembros"></ul>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
   <script src="js/config.js"></script>
   <script src="js/api.js"></script>
-  <script src="js/solicitudes.js"></script>
+  <script src="js/papelera.js"></script>
 </body>
 </html>

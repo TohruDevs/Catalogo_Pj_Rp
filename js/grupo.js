@@ -12,6 +12,8 @@ async function cargar() {
     $('descripcion').textContent = grupo.descripcion || '';
     $('btn-nuevo').hidden = !getToken();
     $('btn-miembros').hidden = !usuario.es_administrador;
+    $('btn-eliminar-grupo').hidden = !usuario.es_administrador;
+    $('btn-editar-grupo').hidden = !usuario.es_administrador;
     render();
   } catch (e) { $('msg').textContent = e.message; }
 }
@@ -19,15 +21,20 @@ async function cargar() {
 const chip = (texto, valor) =>
   el('button', { class: 'chip' + (filtro === valor ? ' activo' : ''), onclick: () => { filtro = valor; render(); } }, texto.toUpperCase());
 
+const norm = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
 function render() {
   const todos = grupo.personajes;
   const deGrupo = new Map(todos.map((p) => [String(p.id_universo_origen), p.universo_origen]));
   if (filtro !== 'todos' && !deGrupo.has(filtro)) filtro = 'todos';
   $('chips').replaceChildren(chip('ALL', 'todos'),
     ...[...deGrupo].sort((a, b) => a[1].localeCompare(b[1])).map(([id, n]) => chip(n, id)));
-  const visibles = filtro === 'todos' ? todos : todos.filter((p) => String(p.id_universo_origen) === filtro);
+  const q = norm($('busqueda').value.trim());
+  const visibles = todos.filter((p) =>
+    (filtro === 'todos' || String(p.id_universo_origen) === filtro) && norm(p.nombre).includes(q));
   $('grid').replaceChildren(...visibles.map(tarjeta));
-  $('msg').textContent = todos.length ? '' : 'Este grupo aún no tiene personajes.';
+  $('msg').textContent = !todos.length ? 'Este grupo aún no tiene personajes.'
+    : !visibles.length ? 'Ningún personaje coincide con la búsqueda.' : '';
 }
 
 function portada(p) {
@@ -96,9 +103,9 @@ function abrirDetalle(p) {
 }
 
 async function eliminar(p) {
-  if (!confirm(`¿Eliminar a ${p.nombre}?`)) return;
+  if (!(await confirmar(`${p.nombre} irá a la papelera. Podrás restaurarlo desde ahí.`, 'ELIMINAR'))) return;
   try { await api('/personajes/' + p.id, { method: 'DELETE' }); $('dlg-detalle').close(); await cargar(); }
-  catch (e) { alert(e.message); }
+  catch (e) { avisarError(e.message); }
 }
 
 // ---------- Crear / editar personaje ----------
@@ -124,7 +131,7 @@ async function abrirFormulario(p) {
   try {
     universos = await api('/universos');
     if (usuario.es_administrador) miembros = await api(`/grupos/${idGrupo}/miembros`);
-  } catch (e) { return alert(e.message); }
+  } catch (e) { return avisarError(e.message); }
 
   $('f-universo').replaceChildren(
     ...universos.map((u) => el('option', { value: u.id }, u.nombre)),
@@ -173,7 +180,7 @@ $('form-personaje').onsubmit = async (e) => {
     $('dlg-personaje').close();
     await cargar();
     if (!usuario.es_administrador && r.estado === 'pendiente') {
-      alert('Tu personaje fue enviado al administrador para su aprobación. Aparecerá en el grupo cuando lo apruebe.');
+      avisar('Tu personaje fue enviado al administrador para su aprobación. Aparecerá en el grupo cuando lo apruebe.', 'success');
     }
   } catch (err) { $('form-error').textContent = err.message; }
 };
@@ -190,7 +197,7 @@ async function cargarPanel() {
   try {
     [miembrosGrupo, todosUsuarios] = await Promise.all([api(`/grupos/${idGrupo}/miembros`), api('/usuarios')]);
     renderPanel();
-  } catch (e) { alert(e.message); }
+  } catch (e) { avisarError(e.message); }
 }
 
 const filaUsuario = (u, texto, peligro, accion) => el('li', {},
@@ -220,7 +227,34 @@ async function cambiarMiembro(metodo, sufijo, body) {
     await api(`/grupos/${idGrupo}/miembros${sufijo}`, { method: metodo, body });
     miembrosGrupo = await api(`/grupos/${idGrupo}/miembros`);
     renderPanel();
-  } catch (e) { alert(e.message); }
+  } catch (e) { avisarError(e.message); }
 }
 
+// ---------- Editar grupo (solo administrador) ----------
+$('btn-editar-grupo').onclick = () => {
+  $('g-nombre').value = grupo.nombre;
+  $('g-desc').value = grupo.descripcion || '';
+  $('grupo-error').textContent = '';
+  $('dlg-grupo').showModal();
+};
+$('form-grupo').onsubmit = async (e) => {
+  e.preventDefault();
+  try {
+    await api('/grupos/' + idGrupo, { method: 'PUT', body: { nombre: $('g-nombre').value.trim(), descripcion: $('g-desc').value } });
+    $('dlg-grupo').close();
+    await cargar();
+  } catch (err) { $('grupo-error').textContent = err.message; }
+};
+
+// ---------- Eliminar grupo (solo administrador) ----------
+$('btn-eliminar-grupo').onclick = async () => {
+  const n = grupo.personajes.length;
+  if (!(await confirmar(`El grupo "${grupo.nombre}" y sus ${n} personaje(s) irán a la papelera. Podrás restaurarlos desde ahí.`, 'ELIMINAR'))) return;
+  try {
+    await api('/grupos/' + idGrupo, { method: 'DELETE' });
+    location.href = 'index.html';
+  } catch (e) { avisarError(e.message); }
+};
+
+$('busqueda').oninput = render;
 cargar();

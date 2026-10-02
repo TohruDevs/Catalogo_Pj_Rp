@@ -81,3 +81,20 @@ dialog.amplio{width:min(900px,95vw);max-height:92vh;overflow:auto}
 .aviso{margin:8px 0;padding:8px 10px;border-radius:3px;text-transform:none;letter-spacing:0}
 .aviso.pendiente{background:#2e2716;color:#d9b866}
 .aviso.rechazado{background:#2e1a1a;color:#d98a8a}
+
+/* ---- SweetAlert2 con el tema oscuro ---- */
+.swal2-container{font-family:'Montserrat',system-ui,sans-serif}
+.sw-popup{border:1px solid #2c2c2c;border-radius:6px}
+.sw-popup .swal2-title.sw-titulo{font-size:15px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#7d6a80}
+.sw-popup .swal2-html-container{font-size:13px;font-weight:500;line-height:1.55;white-space:pre-line}
+.sw-btn{border:0;border-radius:3px;padding:10px 16px;margin:0 4px;font:inherit;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:#262626;color:#a29da4}
+.sw-btn.sw-ok{background:#7d6a80;color:#efe6f1}
+.sw-btn:hover{filter:brightness(1.15)}
+.sw-popup .swal2-input{background:#111;border:1px solid #2c2c2c;color:#c9c3cb;font:inherit;font-size:13px;box-shadow:none}
+.sw-popup .swal2-input:focus{border-color:#7d6a80;box-shadow:none}
+.sw-popup .swal2-validation-message{background:#2e1a1a;color:#d98a8a}
+
+/* ---- Buscador, papelera e historial ---- */
+.busqueda{display:block;max-width:360px;margin:0 0 14px}
+.miembros li small.meta{display:block;margin-top:3px;color:var(--muted)}
+.miembros .botones{margin:0;flex-wrap:nowrap}
