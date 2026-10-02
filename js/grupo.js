@@ -52,7 +52,7 @@ function tarjeta(p) {
   },
     p.estado !== 'aprobado' && el('span', { class: 'insignia ' + p.estado }, p.estado),
     portada(p),
-    el('div', { class: 'info' }, el('h3', {}, p.nombre), el('p', {}, p.descripcion || '')),
+    el('div', { class: 'info' }, el('h3', {}, p.nombre)),
     el('div', { class: 'pie' }, p.universo_origen));
 }
 
