@@ -43,7 +43,8 @@ function montarNav() {
     const sol = el('a', { class: 'btn-nav', href: 'solicitudes.html' }, 'SOLICITUDES');
     nav.append(el('a', { class: 'btn-nav', href: 'admin.html' }, 'ADMIN'), sol,
       el('a', { class: 'btn-nav', href: 'papelera.html' }, 'PAPELERA'),
-      el('a', { class: 'btn-nav', href: 'historial.html' }, 'HISTORIAL'));
+      el('a', { class: 'btn-nav', href: 'historial.html' }, 'HISTORIAL'),
+      el('a', { class: 'btn-nav', href: 'usuarios.html' }, 'USUARIOS'));
     api('/personajes/pendientes').then((l) => { if (l.length) sol.textContent = `SOLICITUDES (${l.length})`; }).catch(() => {});
   }
   if (u) nav.append(
@@ -51,6 +52,15 @@ function montarNav() {
     el('button', { class: 'btn-nav', onclick: cerrarSesion }, 'SALIR')
   );
   else nav.append(el('a', { class: 'btn-nav', href: 'index.html?login=1' }, 'INICIAR SESIÓN'));
+  // Moderadores: enlace a las solicitudes de los grupos que moderan
+  if (u && !u.es_administrador) {
+    api('/grupos/moderados').then((grupos) => {
+      if (!grupos.length) return;
+      const sol = el('a', { class: 'btn-nav', href: 'solicitudes.html' }, 'SOLICITUDES');
+      nav.insertBefore(sol, nav.querySelector('.usuario'));
+      return api('/personajes/pendientes').then((l) => { if (l.length) sol.textContent = `SOLICITUDES (${l.length})`; });
+    }).catch(() => {});
+  }
 }
 
 // ---------- Alertas con SweetAlert2 (tema oscuro) ----------
@@ -121,7 +131,31 @@ async function crearUsuarioAdmin() {
   return r.isConfirmed ? r.value : null;
 }
 
-// Aprobar o rechazar un personaje pendiente (administrador)
+// Formulario para que el administrador edite un usuario (la contrasena es opcional)
+async function editarUsuarioAdmin(u) {
+  if (!SW) { alert('No se pudo cargar el editor. Revisa tu conexion.'); return null; }
+  const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const r = await conSwal({
+    title: 'Editar usuario',
+    html: `<input id="eu-nombre" class="swal2-input" placeholder="Nombre" value="${esc(u.nombre)}">` +
+          `<input id="eu-correo" class="swal2-input" type="email" placeholder="Correo" value="${esc(u.correo)}">` +
+          '<input id="eu-pass" class="swal2-input" type="password" placeholder="Nueva contraseña (vacío = no cambiarla)">' +
+          `<label class="sw-check"><input id="eu-admin" type="checkbox" ${u.es_administrador ? 'checked' : ''}> Es administrador</label>`,
+    focusConfirm: false, showCancelButton: true, confirmButtonText: 'GUARDAR', cancelButtonText: 'CANCELAR',
+    preConfirm: async () => {
+      const body = { nombre: $('eu-nombre').value.trim(), correo: $('eu-correo').value.trim(), es_administrador: $('eu-admin').checked };
+      const pass = $('eu-pass').value;
+      if (pass) body.contrasena = pass;
+      if (!body.nombre || !body.correo) { Swal.showValidationMessage('El nombre y el correo son obligatorios'); return false; }
+      if (pass && pass.length < 6) { Swal.showValidationMessage('La contraseña debe tener al menos 6 caracteres'); return false; }
+      try { return await api('/usuarios/' + u.id, { method: 'PUT', body }); }
+      catch (e) { Swal.showValidationMessage(e.message); return false; }
+    },
+  });
+  return r.isConfirmed ? r.value : null;
+}
+
+// Aprobar o rechazar un personaje pendiente (administrador o moderador)
 async function resolverSolicitud(p, aprobar, despues) {
   try {
     if (aprobar) await api(`/personajes/${p.id}/aprobar`, { method: 'PUT' });

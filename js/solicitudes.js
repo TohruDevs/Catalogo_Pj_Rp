@@ -1,5 +1,5 @@
-// Solo administradores
-if (!getToken() || !(getUsuario() || {}).es_administrador) location.href = 'index.html';
+// El servidor entrega solo las solicitudes que cada persona puede revisar (administrador o moderador)
+if (!getToken()) location.href = 'index.html';
 
 async function cargar() {
   montarNav();

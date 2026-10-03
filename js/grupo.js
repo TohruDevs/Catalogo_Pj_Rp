@@ -11,7 +11,8 @@ async function cargar() {
     $('titulo').textContent = grupo.nombre;
     $('descripcion').textContent = grupo.descripcion || '';
     $('btn-nuevo').hidden = !getToken();
-    $('btn-miembros').hidden = !usuario.es_administrador;
+    $('btn-miembros').hidden = !grupo.puede_moderar;
+    $('btn-miembros').textContent = usuario.es_administrador ? 'ADMINISTRAR MIEMBROS' : 'INVITAR USUARIOS';
     $('btn-eliminar-grupo').hidden = !usuario.es_administrador;
     $('btn-editar-grupo').hidden = !usuario.es_administrador;
     render();
@@ -101,8 +102,8 @@ function abrirDetalle(p) {
           : 'Rechazado' + (p.motivo_rechazo ? ': ' + p.motivo_rechazo : '')),
       el('p', { class: 'info' }, p.descripcion || 'Sin descripción.'),
       el('div', { class: 'botones' },
-        usuario.es_administrador && p.estado === 'pendiente' && el('button', { class: 'chip activo', onclick: () => resolverSolicitud(p, true, despues) }, 'APROBAR'),
-        usuario.es_administrador && p.estado === 'pendiente' && el('button', { class: 'chip peligro', onclick: () => resolverSolicitud(p, false, despues) }, 'RECHAZAR'),
+        grupo.puede_moderar && p.estado === 'pendiente' && el('button', { class: 'chip activo', onclick: () => resolverSolicitud(p, true, despues) }, 'APROBAR'),
+        grupo.puede_moderar && p.estado === 'pendiente' && el('button', { class: 'chip peligro', onclick: () => resolverSolicitud(p, false, despues) }, 'RECHAZAR'),
         puedeEditar && el('button', { class: 'chip', onclick: () => abrirFormulario(p) }, 'EDITAR'),
         puedeEditar && el('button', { class: 'chip peligro', onclick: () => eliminar(p) }, 'ELIMINAR'),
         el('button', { class: 'chip', 'data-cerrar': '' }, 'CERRAR'))));
@@ -194,8 +195,9 @@ $('form-personaje').onsubmit = async (e) => {
   } catch (err) { $('form-error').textContent = err.message; }
 };
 
-// ---------- Panel de miembros (solo administrador) ----------
-let miembrosGrupo = [], todosUsuarios = [];
+// ---------- Panel de miembros (administrador y moderadores) ----------
+let miembrosGrupo = [], candidatos = [];
+$('btn-nuevo-usuario').hidden = !usuario.es_administrador;
 
 $('btn-miembros').onclick = async () => {
   $('panel-admin').hidden = !$('panel-admin').hidden;
@@ -204,29 +206,37 @@ $('btn-miembros').onclick = async () => {
 
 async function cargarPanel() {
   try {
-    [miembrosGrupo, todosUsuarios] = await Promise.all([api(`/grupos/${idGrupo}/miembros`), api('/usuarios')]);
+    [miembrosGrupo, candidatos] = await Promise.all([
+      api(`/grupos/${idGrupo}/miembros`), api(`/grupos/${idGrupo}/candidatos`)]);
     renderPanel();
   } catch (e) { avisarError(e.message); }
 }
 
-const filaUsuario = (u, texto, peligro, accion) => el('li', {},
-  el('span', {}, u.nombre + (u.es_administrador ? ' · admin' : '')),
-  el('button', { class: 'chip' + (peligro ? ' peligro' : ''), onclick: accion }, texto));
+// El administrador puede nombrar moderadores y quitar miembros; el moderador solo ve la lista
+function filaMiembro(m) {
+  const esMod = m.rol === 'moderador';
+  return el('li', {},
+    el('span', {}, m.nombre + (esMod ? ' · moderador' : '')),
+    usuario.es_administrador && el('div', { class: 'botones' },
+      el('button', { class: 'chip', onclick: () => cambiarMiembro('PUT', `/${m.id}`, { rol: esMod ? 'jugador' : 'moderador' }) },
+        esMod ? 'QUITAR MODERADOR' : 'HACER MODERADOR'),
+      el('button', { class: 'chip peligro', onclick: () => cambiarMiembro('DELETE', `/${m.id}`) }, 'QUITAR')));
+}
 
 function renderPanel() {
   $('sub-miembros').textContent = `Miembros (${miembrosGrupo.length})`;
   $('miembros').replaceChildren(...(miembrosGrupo.length
-    ? miembrosGrupo.map((m) => filaUsuario(m, 'QUITAR', true, () => cambiarMiembro('DELETE', `/${m.id}`)))
+    ? miembrosGrupo.map(filaMiembro)
     : [el('li', { class: 'vacio' }, 'Este grupo aún no tiene miembros.')]));
   renderDisponibles();
 }
 
 function renderDisponibles() {
-  const ids = new Set(miembrosGrupo.map((m) => m.id));
   const q = $('buscar').value.trim().toLowerCase();
-  const libres = todosUsuarios.filter((u) => !ids.has(u.id) && u.nombre.toLowerCase().includes(q));
+  const libres = candidatos.filter((u) => u.nombre.toLowerCase().includes(q));
   $('disponibles').replaceChildren(...(libres.length
-    ? libres.map((u) => filaUsuario(u, 'AGREGAR', false, () => cambiarMiembro('POST', '', { id_usuario: u.id })))
+    ? libres.map((u) => el('li', {}, el('span', {}, u.nombre),
+        el('button', { class: 'chip', onclick: () => cambiarMiembro('POST', '', { id_usuario: u.id }) }, 'AGREGAR')))
     : [el('li', { class: 'vacio' }, 'No hay usuarios para agregar.')]));
 }
 $('buscar').oninput = renderDisponibles;
@@ -234,16 +244,14 @@ $('buscar').oninput = renderDisponibles;
 $('btn-nuevo-usuario').onclick = async () => {
   const u = await crearUsuarioAdmin();
   if (!u) return;
-  todosUsuarios = await api('/usuarios');
-  renderDisponibles();
+  await cargarPanel();
   avisar(`Usuario "${u.nombre}" creado. Ya puedes agregarlo al grupo.`, 'success');
 };
 
 async function cambiarMiembro(metodo, sufijo, body) {
   try {
     await api(`/grupos/${idGrupo}/miembros${sufijo}`, { method: metodo, body });
-    miembrosGrupo = await api(`/grupos/${idGrupo}/miembros`);
-    renderPanel();
+    await cargarPanel();
   } catch (e) { avisarError(e.message); }
 }
 
