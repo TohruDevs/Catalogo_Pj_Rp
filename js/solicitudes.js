@@ -20,6 +20,7 @@ function tarjetaSolicitud(p) {
       el('p', { class: 'meta' }, 'Grupo: ' + p.grupo),
       el('p', { class: 'meta' }, 'Jugador: ' + p.jugador),
       el('p', { class: 'meta' }, 'Universo: ' + p.universo_origen),
+      p.solicita_ingreso && el('p', { class: 'meta aviso pendiente' }, 'También solicita unirse al grupo'),
       el('p', {}, p.descripcion || '')),
     el('div', { class: 'botones', style: 'padding:0 14px 14px' },
       el('button', { class: 'chip activo', onclick: () => resolverSolicitud(p, true, cargar) }, 'APROBAR'),

@@ -2,7 +2,7 @@ const idGrupo = new URLSearchParams(location.search).get('id');
 if (!idGrupo) location.href = 'index.html';
 montarNav();
 const usuario = getUsuario() || {};
-let grupo = null, universos = [], filtro = 'todos', editandoId = null;
+let grupo = null, universos = [], filtro = 'todos', filtroJugador = 'todos', editandoId = null;
 
 async function cargar() {
   try {
@@ -29,9 +29,16 @@ function render() {
   if (filtro !== 'todos' && !deGrupo.has(filtro)) filtro = 'todos';
   $('chips').replaceChildren(chip('ALL', 'todos'),
     ...[...deGrupo].sort((a, b) => a[1].localeCompare(b[1])).map(([id, n]) => chip(n, id)));
+  // Filtro por jugador
+  const jugadores = new Map(todos.map((p) => [String(p.id_jugador), p.jugador]));
+  if (filtroJugador !== 'todos' && !jugadores.has(filtroJugador)) filtroJugador = 'todos';
+  $('filtro-jugador').replaceChildren(el('option', { value: 'todos' }, 'Todos los jugadores'),
+    ...[...jugadores].sort((a, b) => a[1].localeCompare(b[1])).map(([id, n]) => el('option', { value: id }, n)));
+  $('filtro-jugador').value = filtroJugador;
   const q = norm($('busqueda').value.trim());
   const visibles = todos.filter((p) =>
-    (filtro === 'todos' || String(p.id_universo_origen) === filtro) && norm(p.nombre).includes(q));
+    (filtro === 'todos' || String(p.id_universo_origen) === filtro) &&
+    (filtroJugador === 'todos' || String(p.id_jugador) === filtroJugador) && norm(p.nombre).includes(q));
   $('grid').replaceChildren(...visibles.map(tarjeta));
   $('msg').textContent = !todos.length ? 'Este grupo aún no tiene personajes.'
     : !visibles.length ? 'Ningún personaje coincide con la búsqueda.' : '';
@@ -47,12 +54,12 @@ function portada(p) {
 
 function tarjeta(p) {
   return el('article', {
-    class: 'card', tabindex: '0', onclick: () => abrirDetalle(p),
+    class: 'card card-fija', tabindex: '0', onclick: () => abrirDetalle(p),
     onkeydown: (e) => { if (e.key === 'Enter') abrirDetalle(p); },
   },
     p.estado !== 'aprobado' && el('span', { class: 'insignia ' + p.estado }, p.estado),
     portada(p),
-    el('div', { class: 'info' }, el('h3', {}, p.nombre)),
+    el('div', { class: 'info' }, el('h3', { title: p.nombre }, p.nombre)),
     el('div', { class: 'pie' }, p.universo_origen));
 }
 
@@ -180,7 +187,9 @@ $('form-personaje').onsubmit = async (e) => {
     $('dlg-personaje').close();
     await cargar();
     if (!usuario.es_administrador && r.estado === 'pendiente') {
-      avisar('Tu personaje fue enviado al administrador para su aprobación. Aparecerá en el grupo cuando lo apruebe.', 'success');
+      avisar(r.solicita_ingreso
+        ? 'Tu personaje y tu solicitud para unirte al grupo fueron enviados al administrador. Cuando lo apruebe, el personaje aparecerá y serás parte del grupo.'
+        : 'Tu personaje fue enviado al administrador para su aprobación. Aparecerá en el grupo cuando lo apruebe.', 'success');
     }
   } catch (err) { $('form-error').textContent = err.message; }
 };
@@ -222,6 +231,14 @@ function renderDisponibles() {
 }
 $('buscar').oninput = renderDisponibles;
 
+$('btn-nuevo-usuario').onclick = async () => {
+  const u = await crearUsuarioAdmin();
+  if (!u) return;
+  todosUsuarios = await api('/usuarios');
+  renderDisponibles();
+  avisar(`Usuario "${u.nombre}" creado. Ya puedes agregarlo al grupo.`, 'success');
+};
+
 async function cambiarMiembro(metodo, sufijo, body) {
   try {
     await api(`/grupos/${idGrupo}/miembros${sufijo}`, { method: metodo, body });
@@ -257,4 +274,5 @@ $('btn-eliminar-grupo').onclick = async () => {
 };
 
 $('busqueda').oninput = render;
+$('filtro-jugador').onchange = (e) => { filtroJugador = e.target.value; render(); };
 cargar();

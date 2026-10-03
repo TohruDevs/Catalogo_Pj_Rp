@@ -88,6 +88,39 @@ async function pedirTexto(titulo, texto, placeholder = '') {
   return r.isConfirmed ? (r.value || '') : null;
 }
 
+// Formulario para que el administrador cree un usuario. Devuelve el usuario creado o null
+async function crearUsuarioAdmin() {
+  if (!SW) {
+    const nombre = prompt('Nombre:');
+    const correo = nombre && prompt('Correo:');
+    const contrasena = correo && prompt('Contraseña (mínimo 6 caracteres):');
+    if (!contrasena) return null;
+    try { return await api('/usuarios', { method: 'POST', body: { nombre, correo, contrasena } }); }
+    catch (e) { alert(e.message); return null; }
+  }
+  const r = await conSwal({
+    title: 'Nuevo usuario',
+    html: '<input id="nu-nombre" class="swal2-input" placeholder="Nombre">' +
+          '<input id="nu-correo" class="swal2-input" type="email" placeholder="Correo">' +
+          '<input id="nu-pass" class="swal2-input" type="password" placeholder="Contraseña (mínimo 6 caracteres)">' +
+          '<label class="sw-check"><input id="nu-admin" type="checkbox"> Es administrador</label>',
+    focusConfirm: false, showCancelButton: true, confirmButtonText: 'CREAR', cancelButtonText: 'CANCELAR',
+    preConfirm: async () => {
+      const body = {
+        nombre: $('nu-nombre').value.trim(), correo: $('nu-correo').value.trim(),
+        contrasena: $('nu-pass').value, es_administrador: $('nu-admin').checked,
+      };
+      if (!body.nombre || !body.correo || body.contrasena.length < 6) {
+        Swal.showValidationMessage('Completa nombre, correo y una contraseña de al menos 6 caracteres');
+        return false;
+      }
+      try { return await api('/usuarios', { method: 'POST', body }); }
+      catch (e) { Swal.showValidationMessage(e.message); return false; }
+    },
+  });
+  return r.isConfirmed ? r.value : null;
+}
+
 // Aprobar o rechazar un personaje pendiente (administrador)
 async function resolverSolicitud(p, aprobar, despues) {
   try {

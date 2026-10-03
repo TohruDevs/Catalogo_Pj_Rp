@@ -27,7 +27,7 @@ async function seleccionar(id) {
 }
 
 const fila = (u, texto, peligro, accion) => el('li', {},
-  el('span', {}, `${u.nombre} (${u.correo})` + (u.es_administrador ? ' · admin' : '')),
+  el('span', {}, u.nombre + (u.es_administrador ? ' · admin' : '')),
   el('button', { class: 'chip' + (peligro ? ' peligro' : ''), onclick: accion }, texto));
 
 function renderPanel() {
@@ -43,12 +43,20 @@ function renderPanel() {
 function renderDisponibles() {
   const ids = new Set(miembros.map((m) => m.id));
   const q = $('buscar').value.trim().toLowerCase();
-  const libres = todos.filter((u) => !ids.has(u.id) && `${u.nombre} ${u.correo}`.toLowerCase().includes(q));
+  const libres = todos.filter((u) => !ids.has(u.id) && u.nombre.toLowerCase().includes(q));
   $('disponibles').replaceChildren(...(libres.length
     ? libres.map((u) => fila(u, 'AGREGAR', false, () => cambiar('POST', '', { id_usuario: u.id })))
     : [el('li', { class: 'vacio' }, 'No hay usuarios para agregar.')]));
 }
 $('buscar').oninput = renderDisponibles;
+
+$('btn-nuevo-usuario').onclick = async () => {
+  const u = await crearUsuarioAdmin();
+  if (!u) return;
+  todos = await api('/usuarios');
+  renderDisponibles();
+  avisar(`Usuario "${u.nombre}" creado. Ya puedes agregarlo a un grupo.`, 'success');
+};
 
 async function cambiar(metodo, sufijo, body) {
   try {

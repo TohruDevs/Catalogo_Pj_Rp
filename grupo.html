@@ -15,7 +15,10 @@
       <span class="etiqueta">Universo</span>
       <div id="chips" class="chips"></div>
     </div>
-    <input id="busqueda" class="busqueda" type="search" placeholder="Buscar personaje por nombre...">
+    <div class="fila">
+      <input id="busqueda" class="busqueda" type="search" placeholder="Buscar personaje por nombre...">
+      <select id="filtro-jugador" class="busqueda"></select>
+    </div>
     <div class="fila">
       <button class="chip" id="btn-nuevo" hidden>+ NUEVO PERSONAJE</button>
       <button class="chip" id="btn-miembros" hidden>ADMINISTRAR MIEMBROS</button>
@@ -26,6 +29,7 @@
       <h3 class="sub" id="sub-miembros">Miembros</h3>
       <ul id="miembros" class="miembros"></ul>
       <h3 class="sub">Agregar usuarios</h3>
+      <button class="chip" id="btn-nuevo-usuario" type="button">+ NUEVO USUARIO</button>
       <input id="buscar" placeholder="Buscar por nombre...">
       <ul id="disponibles" class="miembros"></ul>
     </section>
