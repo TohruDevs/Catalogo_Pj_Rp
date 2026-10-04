@@ -212,15 +212,15 @@ async function cargarPanel() {
   } catch (e) { avisarError(e.message); }
 }
 
-// El administrador puede nombrar moderadores y quitar miembros; el moderador solo ve la lista
+// El administrador nombra moderadores y quita a cualquiera; el moderador solo puede quitar jugadores
 function filaMiembro(m) {
   const esMod = m.rol === 'moderador';
   return el('li', {},
     el('span', {}, m.nombre + (esMod ? ' · moderador' : '')),
-    usuario.es_administrador && el('div', { class: 'botones' },
-      el('button', { class: 'chip', onclick: () => cambiarMiembro('PUT', `/${m.id}`, { rol: esMod ? 'jugador' : 'moderador' }) },
+    el('div', { class: 'botones' },
+      usuario.es_administrador && el('button', { class: 'chip', onclick: () => cambiarMiembro('PUT', `/${m.id}`, { rol: esMod ? 'jugador' : 'moderador' }) },
         esMod ? 'QUITAR MODERADOR' : 'HACER MODERADOR'),
-      el('button', { class: 'chip peligro', onclick: () => cambiarMiembro('DELETE', `/${m.id}`) }, 'QUITAR')));
+      m.quitable && el('button', { class: 'chip peligro', onclick: () => quitarMiembro(m) }, 'QUITAR')));
 }
 
 function renderPanel() {
@@ -247,6 +247,11 @@ $('btn-nuevo-usuario').onclick = async () => {
   await cargarPanel();
   avisar(`Usuario "${u.nombre}" creado. Ya puedes agregarlo al grupo.`, 'success');
 };
+
+async function quitarMiembro(m) {
+  if (!(await confirmar(`¿Quitar a ${m.nombre} del grupo?`, 'QUITAR'))) return;
+  await cambiarMiembro('DELETE', `/${m.id}`);
+}
 
 async function cambiarMiembro(metodo, sufijo, body) {
   try {
