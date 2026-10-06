@@ -2,11 +2,12 @@ const idGrupo = new URLSearchParams(location.search).get('id');
 if (!idGrupo) location.href = 'index.html';
 montarNav();
 const usuario = getUsuario() || {};
-let grupo = null, universos = [], filtro = 'todos', filtroJugador = 'todos', editandoId = null;
+let grupo = null, universos = [], buscados = [], pestana = 'personajes', modoForm = 'personaje';
+let filtro = 'todos', filtroJugador = 'todos', editandoId = null;
 
 async function cargar() {
   try {
-    grupo = await api('/grupos/' + idGrupo);
+    [grupo, buscados] = await Promise.all([api('/grupos/' + idGrupo), api('/buscados?grupo=' + idGrupo)]);
     document.title = grupo.nombre;
     $('titulo').textContent = grupo.nombre;
     $('descripcion').textContent = grupo.descripcion || '';
@@ -19,30 +20,69 @@ async function cargar() {
   } catch (e) { $('msg').textContent = e.message; }
 }
 
+const MAX_CHIPS = 5;
+
 const chip = (texto, valor) =>
   el('button', { class: 'chip' + (filtro === valor ? ' activo' : ''), onclick: () => { filtro = valor; render(); } }, texto.toUpperCase());
 
 const norm = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
+function renderPestanas() {
+  const boton = (id, texto, n) => el('button', {
+    class: 'chip' + (pestana === id ? ' activo' : ''),
+    onclick: () => { pestana = id; filtro = 'todos'; filtroJugador = 'todos'; render(); },
+  }, `${texto} (${n})`);
+  $('pestanas').replaceChildren(boton('personajes', 'PERSONAJES', grupo.personajes.length), boton('buscados', 'BUSCADOS', buscados.length));
+}
+
+// Universos ordenados por cantidad: los mas usados como botones y el resto dentro de un menu
+function renderUniversos(lista) {
+  const conteo = new Map();
+  lista.forEach((p) => {
+    const k = String(p.id_universo_origen);
+    conteo.set(k, { nombre: p.universo_origen, n: (conteo.get(k)?.n || 0) + 1 });
+  });
+  if (filtro !== 'todos' && !conteo.has(filtro)) filtro = 'todos';
+  const orden = [...conteo].sort((a, b) => b[1].n - a[1].n || a[1].nombre.localeCompare(b[1].nombre));
+  const principales = orden.slice(0, MAX_CHIPS), resto = orden.slice(MAX_CHIPS);
+  const elementos = [chip(`ALL (${lista.length})`, 'todos'), ...principales.map(([id, u]) => chip(`${u.nombre} (${u.n})`, id))];
+  if (resto.length) {
+    const enResto = resto.some(([id]) => id === filtro);
+    const sel = el('select', { class: 'chip' + (enResto ? ' activo' : '') },
+      el('option', { value: '' }, `MÁS (${resto.length}) ▾`),
+      ...resto.map(([id, u]) => el('option', { value: id }, `${u.nombre} (${u.n})`)));
+    sel.value = enResto ? filtro : '';
+    sel.onchange = () => { filtro = sel.value || 'todos'; render(); };
+    elementos.push(sel);
+  }
+  $('chips').replaceChildren(...elementos);
+}
+
 function render() {
-  const todos = grupo.personajes;
-  const deGrupo = new Map(todos.map((p) => [String(p.id_universo_origen), p.universo_origen]));
-  if (filtro !== 'todos' && !deGrupo.has(filtro)) filtro = 'todos';
-  $('chips').replaceChildren(chip('ALL', 'todos'),
-    ...[...deGrupo].sort((a, b) => a[1].localeCompare(b[1])).map(([id, n]) => chip(n, id)));
-  // Filtro por jugador
-  const jugadores = new Map(todos.map((p) => [String(p.id_jugador), p.jugador]));
+  const enBuscados = pestana === 'buscados';
+  const todos = enBuscados ? buscados : grupo.personajes;
+  renderPestanas();
+  renderUniversos(todos);
+  $('btn-nuevo').hidden = !getToken() || enBuscados;
+  $('btn-nuevo-buscado').hidden = !(grupo.puede_moderar && enBuscados);
+
+  // Filtro por jugador (solo en la pestana de personajes)
+  const jugadores = new Map(grupo.personajes.map((p) => [String(p.id_jugador), p.jugador]));
   if (filtroJugador !== 'todos' && !jugadores.has(filtroJugador)) filtroJugador = 'todos';
   $('filtro-jugador').replaceChildren(el('option', { value: 'todos' }, 'Todos los jugadores'),
     ...[...jugadores].sort((a, b) => a[1].localeCompare(b[1])).map(([id, n]) => el('option', { value: id }, n)));
   $('filtro-jugador').value = filtroJugador;
+  $('filtro-jugador').hidden = enBuscados;
+  $('busqueda').placeholder = enBuscados ? 'Buscar personaje buscado por nombre...' : 'Buscar personaje por nombre...';
+
   const q = norm($('busqueda').value.trim());
   const visibles = todos.filter((p) =>
     (filtro === 'todos' || String(p.id_universo_origen) === filtro) &&
-    (filtroJugador === 'todos' || String(p.id_jugador) === filtroJugador) && norm(p.nombre).includes(q));
-  $('grid').replaceChildren(...visibles.map(tarjeta));
-  $('msg').textContent = !todos.length ? 'Este grupo aún no tiene personajes.'
-    : !visibles.length ? 'Ningún personaje coincide con la búsqueda.' : '';
+    (enBuscados || filtroJugador === 'todos' || String(p.id_jugador) === filtroJugador) && norm(p.nombre).includes(q));
+  $('grid').replaceChildren(...visibles.map(enBuscados ? tarjetaBuscado : tarjeta));
+  $('msg').textContent = !todos.length
+    ? (enBuscados ? 'Este grupo no tiene personajes buscados por ahora.' : 'Este grupo aún no tiene personajes.')
+    : !visibles.length ? 'Ningún resultado coincide con la búsqueda.' : '';
 }
 
 function portada(p) {
@@ -64,10 +104,21 @@ function tarjeta(p) {
     el('div', { class: 'pie' }, p.universo_origen));
 }
 
+function tarjetaBuscado(b) {
+  return el('article', {
+    class: 'card card-fija', tabindex: '0', onclick: () => abrirDetalle(b, true),
+    onkeydown: (e) => { if (e.key === 'Enter') abrirDetalle(b, true); },
+  },
+    el('span', { class: 'insignia buscado' }, 'buscado'),
+    portada(b),
+    el('div', { class: 'info' }, el('h3', { title: b.nombre }, b.nombre)),
+    el('div', { class: 'pie' }, b.universo_origen));
+}
+
 // ---------- Detalle estilo tienda: miniaturas + imagen principal + informacion ----------
-function abrirDetalle(p) {
+function abrirDetalle(p, esBuscado = false) {
   const imgs = (p.imagenes || []).filter(urlSegura);
-  const puedeEditar = usuario.es_administrador || p.id_jugador === usuario.id;
+  const puedeEditar = esBuscado ? grupo.puede_moderar : (usuario.es_administrador || p.id_jugador === usuario.id);
   const despues = async () => { $('dlg-detalle').close(); await cargar(); montarNav(); };
   const pantalla = el('div', { class: 'galeria-principal' });
   const minis = el('div', { class: 'miniaturas' });
@@ -96,16 +147,18 @@ function abrirDetalle(p) {
     el('div', {},
       el('h2', {}, p.nombre),
       el('p', { class: 'meta' }, 'Universo: ' + p.universo_origen),
-      el('p', { class: 'meta' }, 'Jugador: ' + p.jugador),
-      p.estado !== 'aprobado' && el('p', { class: 'meta aviso ' + p.estado },
+      esBuscado ? el('p', { class: 'meta aviso pendiente' }, 'Personaje buscado: todavía no tiene jugador')
+        : el('p', { class: 'meta' }, 'Jugador: ' + p.jugador),
+      !esBuscado && p.estado !== 'aprobado' && el('p', { class: 'meta aviso ' + p.estado },
         p.estado === 'pendiente' ? 'Pendiente de aprobación del administrador'
           : 'Rechazado' + (p.motivo_rechazo ? ': ' + p.motivo_rechazo : '')),
       el('p', { class: 'info' }, p.descripcion || 'Sin descripción.'),
       el('div', { class: 'botones' },
         grupo.puede_moderar && p.estado === 'pendiente' && el('button', { class: 'chip activo', onclick: () => resolverSolicitud(p, true, despues) }, 'APROBAR'),
         grupo.puede_moderar && p.estado === 'pendiente' && el('button', { class: 'chip peligro', onclick: () => resolverSolicitud(p, false, despues) }, 'RECHAZAR'),
-        puedeEditar && el('button', { class: 'chip', onclick: () => abrirFormulario(p) }, 'EDITAR'),
-        puedeEditar && el('button', { class: 'chip peligro', onclick: () => eliminar(p) }, 'ELIMINAR'),
+        esBuscado && puedeEditar && el('button', { class: 'chip activo', onclick: () => asignarBuscado(p) }, 'ASIGNAR A UN USUARIO'),
+        puedeEditar && el('button', { class: 'chip', onclick: () => abrirFormulario(p, esBuscado ? 'buscado' : 'personaje') }, 'EDITAR'),
+        puedeEditar && el('button', { class: 'chip peligro', onclick: () => (esBuscado ? eliminarBuscado(p) : eliminar(p)) }, 'ELIMINAR'),
         el('button', { class: 'chip', 'data-cerrar': '' }, 'CERRAR'))));
   $('dlg-detalle').showModal();
 }
@@ -116,7 +169,37 @@ async function eliminar(p) {
   catch (e) { avisarError(e.message); }
 }
 
-// ---------- Crear / editar personaje ----------
+async function eliminarBuscado(b) {
+  if (!(await confirmar(`¿Quitar a "${b.nombre}" de los personajes buscados? Esta acción no se puede deshacer.`, 'QUITAR'))) return;
+  try { await api('/buscados/' + b.id, { method: 'DELETE' }); $('dlg-detalle').close(); await cargar(); }
+  catch (e) { avisarError(e.message); }
+}
+
+// Asigna un personaje buscado a un usuario del grupo: pasa a ser un personaje suyo y sale de los buscados
+async function asignarBuscado(b) {
+  if (!SW) return avisarError('No se pudo cargar el selector. Revisa tu conexión.');
+  $('dlg-detalle').close();
+  let miembros;
+  try { miembros = await api(`/grupos/${idGrupo}/miembros`); }
+  catch (e) { return avisarError(e.message); }
+  if (!miembros.length) return avisarError('Este grupo aún no tiene miembros a los que asignar.');
+  const r = await conSwal({
+    title: 'Asignar a un usuario',
+    text: `"${b.nombre}" pasará a ser un personaje del usuario que elijas y dejará de estar en los personajes buscados.`,
+    input: 'select', inputOptions: new Map(miembros.map((m) => [String(m.id), m.nombre])),
+    inputPlaceholder: 'Elige un usuario',
+    showCancelButton: true, confirmButtonText: 'ASIGNAR', cancelButtonText: 'CANCELAR',
+    inputValidator: (v) => (v ? null : 'Elige un usuario'),
+  });
+  if (!r.isConfirmed) return abrirDetalle(b, true);
+  try {
+    await api(`/buscados/${b.id}/asignar`, { method: 'POST', body: { id_usuario: Number(r.value) } });
+    await cargar();
+    avisar(`"${b.nombre}" ya es un personaje del usuario elegido y salió de los buscados.`, 'success');
+  } catch (e) { avisarError(e.message); }
+}
+
+// ---------- Crear / editar personaje (y personajes buscados) ----------
 const actualizarNuevo = () => {
   const nuevo = $('f-universo').value === 'nuevo';
   $('wrap-nuevo').hidden = !nuevo;
@@ -124,21 +207,23 @@ const actualizarNuevo = () => {
 };
 $('f-universo').onchange = actualizarNuevo;
 $('btn-nuevo').onclick = () => abrirFormulario(null);
+$('btn-nuevo-buscado').onclick = () => abrirFormulario(null, 'buscado');
 
 const filaImagen = (valor = '') => el('div', { class: 'fila-img' },
   el('input', { type: 'url', placeholder: 'https://...', value: valor }),
   el('button', { type: 'button', class: 'chip peligro', onclick: (e) => e.target.closest('.fila-img').remove() }, '✕'));
 $('btn-add-img').onclick = () => $('f-imagenes').append(filaImagen());
 
-async function abrirFormulario(p) {
+async function abrirFormulario(p, modo = 'personaje') {
   $('dlg-detalle').close();
+  modoForm = modo;
   editandoId = p ? p.id : null;
-  $('form-titulo').textContent = p ? 'Editar personaje' : 'Nuevo personaje';
+  $('form-titulo').textContent = (p ? 'Editar ' : 'Nuevo ') + (modo === 'buscado' ? 'personaje buscado' : 'personaje');
   $('form-error').textContent = '';
   let miembros = [];
   try {
     universos = await api('/universos');
-    if (usuario.es_administrador) miembros = await api(`/grupos/${idGrupo}/miembros`);
+    if (usuario.es_administrador && modo === 'personaje') miembros = await api(`/grupos/${idGrupo}/miembros`);
   } catch (e) { return avisarError(e.message); }
 
   $('f-universo').replaceChildren(
@@ -152,8 +237,9 @@ async function abrirFormulario(p) {
   $('f-imagenes').replaceChildren(...(p?.imagenes?.length ? p.imagenes : ['']).map((u) => filaImagen(u)));
 
   // Solo el administrador puede asignar el personaje a un jugador del grupo
-  $('wrap-jugador').hidden = !usuario.es_administrador;
-  if (usuario.es_administrador) {
+  const asignaJugador = usuario.es_administrador && modo === 'personaje';
+  $('wrap-jugador').hidden = !asignaJugador;
+  if (asignaJugador) {
     const sel = $('f-jugador');
     const opciones = miembros.map((m) => el('option', { value: m.id }, m.nombre));
     if (p && !miembros.some((m) => m.id === p.id_jugador)) opciones.push(el('option', { value: p.id_jugador }, p.jugador));
@@ -181,13 +267,14 @@ $('form-personaje').onsubmit = async (e) => {
       imagenes: [...$('f-imagenes').querySelectorAll('input')].map((i) => i.value.trim()).filter(Boolean),
       id_universo_origen: Number(idUniverso),
     };
-    if (usuario.es_administrador && $('f-jugador').value) body.id_jugador = Number($('f-jugador').value);
+    const ruta = modoForm === 'buscado' ? '/buscados' : '/personajes';
+    if (modoForm === 'personaje' && usuario.es_administrador && $('f-jugador').value) body.id_jugador = Number($('f-jugador').value);
     const r = editandoId
-      ? await api('/personajes/' + editandoId, { method: 'PUT', body })
-      : await api('/personajes', { method: 'POST', body: { ...body, id_grupo: Number(idGrupo) } });
+      ? await api(`${ruta}/${editandoId}`, { method: 'PUT', body })
+      : await api(ruta, { method: 'POST', body: { ...body, id_grupo: Number(idGrupo) } });
     $('dlg-personaje').close();
     await cargar();
-    if (!usuario.es_administrador && r.estado === 'pendiente') {
+    if (modoForm === 'personaje' && !usuario.es_administrador && r.estado === 'pendiente') {
       avisar(r.solicita_ingreso
         ? 'Tu personaje y tu solicitud para unirte al grupo fueron enviados al administrador. Cuando lo apruebe, el personaje aparecerá y serás parte del grupo.'
         : 'Tu personaje fue enviado al administrador para su aprobación. Aparecerá en el grupo cuando lo apruebe.', 'success');
