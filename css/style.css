@@ -119,6 +119,12 @@ select.chip{width:auto;max-width:210px;cursor:pointer}
 select.chip.activo{background:var(--acento);color:var(--acento-t)}
 select.chip option{background:#181818;color:#c9c3cb}
 .insignia.buscado{background:#2d4a52;color:#d3f1f8}
+
 /* ---- Buscados asignados a un usuario ---- */
 .insignia.asignado{background:#2f4a33;color:#d6f3da}
 .aviso.asignado{background:#1e2e22;color:#8fd19a}
+
+/* ---- Selector de SweetAlert dentro del modal ---- */
+.sw-popup .swal2-select{width:calc(100% - 4em);max-width:100%;min-width:0;margin:1em 2em 3px;box-sizing:border-box;background:#111;border:1px solid #2c2c2c;border-radius:3px;color:#c9c3cb;font:inherit;font-size:13px;padding:9px}
+.sw-popup .swal2-select:focus{border-color:#7d6a80;box-shadow:none;outline:none}
+.sw-popup .swal2-select option{background:#181818;color:#c9c3cb}
