@@ -128,3 +128,7 @@ select.chip option{background:#181818;color:#c9c3cb}
 .sw-popup .swal2-select{width:calc(100% - 4em);max-width:100%;min-width:0;margin:1em 2em 3px;box-sizing:border-box;background:#111;border:1px solid #2c2c2c;border-radius:3px;color:#c9c3cb;font:inherit;font-size:13px;padding:9px}
 .sw-popup .swal2-select:focus{border-color:#7d6a80;box-shadow:none;outline:none}
 .sw-popup .swal2-select option{background:#181818;color:#c9c3cb}
+
+/* ---- Personajes ocultos: translucidos para el administrador ---- */
+.card-oculta > :not(.insignia){opacity:.4;filter:grayscale(.5);transition:opacity .15s}
+.card-oculta:hover > :not(.insignia){opacity:.75}

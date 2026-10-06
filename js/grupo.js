@@ -95,7 +95,7 @@ function portada(p) {
 
 function tarjeta(p) {
   return el('article', {
-    class: 'card card-fija', tabindex: '0', onclick: () => abrirDetalle(p),
+    class: 'card card-fija' + (p.oculto ? ' card-oculta' : ''), tabindex: '0', onclick: () => abrirDetalle(p),
     onkeydown: (e) => { if (e.key === 'Enter') abrirDetalle(p); },
   },
     p.oculto ? el('span', { class: 'insignia oculto' }, 'oculto')
@@ -340,7 +340,7 @@ function renderDisponibles() {
   const libres = candidatos.filter((u) => u.nombre.toLowerCase().includes(q));
   $('disponibles').replaceChildren(...(libres.length
     ? libres.map((u) => el('li', {}, el('span', {}, u.nombre),
-        el('button', { class: 'chip', onclick: () => cambiarMiembro('POST', '', { id_usuario: u.id }) }, 'AGREGAR')))
+      el('button', { class: 'chip', onclick: () => cambiarMiembro('POST', '', { id_usuario: u.id }) }, 'AGREGAR')))
     : [el('li', { class: 'vacio' }, 'No hay usuarios para agregar.')]));
 }
 $('buscar').oninput = renderDisponibles;
