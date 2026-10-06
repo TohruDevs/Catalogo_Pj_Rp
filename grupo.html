@@ -1,14 +1,21 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
+  <link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=2">
   <title>Grupo</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
-  <header class="top"><h1 id="titulo">Directorio de personajes</h1><nav id="nav"></nav></header>
+  <header class="top">
+    <h1 id="titulo">Directorio de personajes</h1>
+    <nav id="nav"></nav>
+  </header>
   <main>
     <p id="descripcion" class="desc"></p>
     <div class="fila" id="pestanas"></div>
@@ -45,11 +52,14 @@
       <label for="g-nombre">Nombre</label><input id="g-nombre" required>
       <label for="g-desc">Descripción</label><textarea id="g-desc"></textarea>
       <p id="grupo-error" class="error"></p>
-      <div class="botones"><button class="chip activo">GUARDAR</button><button type="button" class="chip" data-cerrar>CANCELAR</button></div>
+      <div class="botones"><button class="chip activo">GUARDAR</button><button type="button" class="chip"
+          data-cerrar>CANCELAR</button></div>
     </form>
   </dialog>
 
-  <dialog id="dlg-detalle" class="amplio"><div id="detalle" class="detalle"></div></dialog>
+  <dialog id="dlg-detalle" class="amplio">
+    <div id="detalle" class="detalle"></div>
+  </dialog>
 
   <dialog id="dlg-personaje">
     <h2 id="form-titulo"></h2>
@@ -61,9 +71,11 @@
       <label for="f-descripcion">Descripción</label><textarea id="f-descripcion"></textarea>
       <label for="f-universo">Universo de origen</label><select id="f-universo"></select>
       <div id="wrap-nuevo" hidden><label for="f-nuevo">Nombre del nuevo universo</label><input id="f-nuevo"></div>
-      <div id="wrap-jugador" hidden><label for="f-jugador">Jugador asignado</label><select id="f-jugador"></select></div>
+      <div id="wrap-jugador" hidden><label for="f-jugador">Jugador asignado</label><select id="f-jugador"></select>
+      </div>
       <p id="form-error" class="error"></p>
-      <div class="botones"><button class="chip activo">GUARDAR</button><button type="button" class="chip" data-cerrar>CANCELAR</button></div>
+      <div class="botones"><button class="chip activo">GUARDAR</button><button type="button" class="chip"
+          data-cerrar>CANCELAR</button></div>
     </form>
   </dialog>
 
@@ -72,4 +84,5 @@
   <script src="js/api.js"></script>
   <script src="js/grupo.js"></script>
 </body>
+
 </html>

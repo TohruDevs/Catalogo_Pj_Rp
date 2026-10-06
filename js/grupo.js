@@ -98,7 +98,8 @@ function tarjeta(p) {
     class: 'card card-fija', tabindex: '0', onclick: () => abrirDetalle(p),
     onkeydown: (e) => { if (e.key === 'Enter') abrirDetalle(p); },
   },
-    p.estado !== 'aprobado' && el('span', { class: 'insignia ' + p.estado }, p.estado),
+    p.oculto ? el('span', { class: 'insignia oculto' }, 'oculto')
+      : p.estado !== 'aprobado' && el('span', { class: 'insignia ' + p.estado }, p.estado),
     portada(p),
     el('div', { class: 'info' }, el('h3', { title: p.nombre }, p.nombre)),
     el('div', { class: 'pie' }, p.universo_origen));
@@ -149,6 +150,7 @@ function abrirDetalle(p, esBuscado = false) {
       el('p', { class: 'meta' }, 'Universo: ' + p.universo_origen),
       esBuscado ? el('p', { class: 'meta aviso pendiente' }, 'Personaje buscado: todavía no tiene jugador')
         : el('p', { class: 'meta' }, 'Jugador: ' + p.jugador),
+      !esBuscado && p.oculto && el('p', { class: 'meta aviso oculto' }, 'Oculto: solo los administradores pueden ver este personaje'),
       !esBuscado && p.estado !== 'aprobado' && el('p', { class: 'meta aviso ' + p.estado },
         p.estado === 'pendiente' ? 'Pendiente de aprobación del administrador'
           : 'Rechazado' + (p.motivo_rechazo ? ': ' + p.motivo_rechazo : '')),
@@ -157,6 +159,7 @@ function abrirDetalle(p, esBuscado = false) {
         grupo.puede_moderar && p.estado === 'pendiente' && el('button', { class: 'chip activo', onclick: () => resolverSolicitud(p, true, despues) }, 'APROBAR'),
         grupo.puede_moderar && p.estado === 'pendiente' && el('button', { class: 'chip peligro', onclick: () => resolverSolicitud(p, false, despues) }, 'RECHAZAR'),
         esBuscado && puedeEditar && el('button', { class: 'chip activo', onclick: () => asignarBuscado(p) }, 'ASIGNAR A UN USUARIO'),
+        !esBuscado && usuario.es_administrador && el('button', { class: 'chip', onclick: () => alternarOculto(p) }, p.oculto ? 'MOSTRAR' : 'OCULTAR'),
         puedeEditar && el('button', { class: 'chip', onclick: () => abrirFormulario(p, esBuscado ? 'buscado' : 'personaje') }, 'EDITAR'),
         puedeEditar && el('button', { class: 'chip peligro', onclick: () => (esBuscado ? eliminarBuscado(p) : eliminar(p)) }, 'ELIMINAR'),
         el('button', { class: 'chip', 'data-cerrar': '' }, 'CERRAR'))));
@@ -167,6 +170,20 @@ async function eliminar(p) {
   if (!(await confirmar(`${p.nombre} irá a la papelera. Podrás restaurarlo desde ahí.`, 'ELIMINAR'))) return;
   try { await api('/personajes/' + p.id, { method: 'DELETE' }); $('dlg-detalle').close(); await cargar(); }
   catch (e) { avisarError(e.message); }
+}
+
+// Oculta o muestra un personaje (solo administrador): oculto, solo los administradores lo ven
+async function alternarOculto(p) {
+  const ocultar = !p.oculto;
+  const texto = ocultar
+    ? `"${p.nombre}" dejará de ser visible para todos, salvo para los administradores.`
+    : `"${p.nombre}" volverá a ser visible para todos.`;
+  if (!(await confirmar(texto, ocultar ? 'OCULTAR' : 'MOSTRAR'))) return;
+  try {
+    await api(`/personajes/${p.id}/oculto`, { method: 'PUT', body: { oculto: ocultar } });
+    $('dlg-detalle').close();
+    await cargar();
+  } catch (e) { avisarError(e.message); }
 }
 
 async function eliminarBuscado(b) {
