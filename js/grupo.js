@@ -20,6 +20,27 @@ async function cargar() {
   } catch (e) { $('msg').textContent = e.message; }
 }
 
+// ---------- Carga infinita: las tarjetas se pintan por lotes al acercarse al final ----------
+const TAM_LOTE = 24;
+let listaVisible = [], mostrados = 0;
+
+const observador = 'IntersectionObserver' in window
+  ? new IntersectionObserver((entradas) => {
+      if (entradas.some((e) => e.isIntersecting) && mostrados < listaVisible.length) cargarMas();
+    }, { rootMargin: '600px' })
+  : null;
+
+function cargarMas() {
+  const hacer = pestana === 'buscados' ? tarjetaBuscado : tarjeta;
+  const lote = listaVisible.slice(mostrados, mostrados + (observador ? TAM_LOTE : listaVisible.length));
+  lote.forEach((item) => $('grid').append(hacer(item)));
+  mostrados += lote.length;
+  const quedan = mostrados < listaVisible.length;
+  $('centinela').hidden = !quedan;
+  // Si el final de la lista sigue a la vista, el observador vuelve a avisar y se carga otro lote
+  if (quedan && observador) { observador.unobserve($('centinela')); observador.observe($('centinela')); }
+}
+
 const MAX_CHIPS = 5;
 
 const chip = (texto, valor) =>
@@ -79,7 +100,10 @@ function render() {
   const visibles = todos.filter((p) =>
     (filtro === 'todos' || String(p.id_universo_origen) === filtro) &&
     (enBuscados || filtroJugador === 'todos' || String(p.id_jugador) === filtroJugador) && norm(p.nombre).includes(q));
-  $('grid').replaceChildren(...visibles.map(enBuscados ? tarjetaBuscado : tarjeta));
+  listaVisible = visibles;
+  mostrados = 0;
+  $('grid').replaceChildren();
+  cargarMas();
   $('msg').textContent = !todos.length
     ? (enBuscados ? 'Este grupo no tiene personajes buscados por ahora.' : 'Este grupo aún no tiene personajes.')
     : !visibles.length ? 'Ningún resultado coincide con la búsqueda.' : '';
@@ -89,7 +113,7 @@ function portada(p) {
   const url = urlSegura((p.imagenes || [])[0]);
   const vacio = () => el('div', { class: 'portada sin-imagen' }, p.nombre.charAt(0).toUpperCase());
   return url
-    ? el('img', { class: 'portada', src: url, alt: p.nombre, loading: 'lazy', onerror: (e) => e.target.replaceWith(vacio()) })
+    ? el('img', { class: 'portada', src: url, alt: p.nombre, loading: 'lazy', decoding: 'async', onerror: (e) => e.target.replaceWith(vacio()) })
     : vacio();
 }
 
@@ -340,7 +364,7 @@ function renderDisponibles() {
   const libres = candidatos.filter((u) => u.nombre.toLowerCase().includes(q));
   $('disponibles').replaceChildren(...(libres.length
     ? libres.map((u) => el('li', {}, el('span', {}, u.nombre),
-      el('button', { class: 'chip', onclick: () => cambiarMiembro('POST', '', { id_usuario: u.id }) }, 'AGREGAR')))
+        el('button', { class: 'chip', onclick: () => cambiarMiembro('POST', '', { id_usuario: u.id }) }, 'AGREGAR')))
     : [el('li', { class: 'vacio' }, 'No hay usuarios para agregar.')]));
 }
 $('buscar').oninput = renderDisponibles;
@@ -390,6 +414,7 @@ $('btn-eliminar-grupo').onclick = async () => {
   } catch (e) { avisarError(e.message); }
 };
 
-$('busqueda').oninput = render;
+let esperaBusqueda;
+$('busqueda').oninput = () => { clearTimeout(esperaBusqueda); esperaBusqueda = setTimeout(render, 200); };
 $('filtro-jugador').onchange = (e) => { filtroJugador = e.target.value; render(); };
 cargar();
