@@ -3,7 +3,7 @@ if (!getToken() || !(getUsuario() || {}).es_administrador) location.href = 'inde
 montarNav();
 
 const POR_PAGINA = 50;
-const TIPOS = [['', 'TODO'], ['grupo', 'GRUPOS'], ['personaje', 'PERSONAJES'], ['miembro', 'MIEMBROS'], ['usuario', 'USUARIOS'], ['buscado', 'BUSCADOS']];
+const TIPOS = [['', 'TODO'], ['grupo', 'GRUPOS'], ['personaje', 'PERSONAJES'], ['miembro', 'MIEMBROS'], ['usuario', 'USUARIOS'], ['buscado', 'BUSCADOS'], ['zona', 'ZONAS']];
 let tipo = '', ultimoId = null;
 
 function filtros() {

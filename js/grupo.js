@@ -2,6 +2,7 @@ const idGrupo = new URLSearchParams(location.search).get('id');
 if (!idGrupo) location.href = 'index.html';
 montarNav();
 const usuario = getUsuario() || {};
+$('enlace-trama').href = 'trama.html?id=' + idGrupo;
 let grupo = null, universos = [], buscados = [], pestana = 'personajes', modoForm = 'personaje';
 let filtro = 'todos', filtroJugador = 'todos', editandoId = null;
 

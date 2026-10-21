@@ -129,6 +129,48 @@ select.chip option{background:#181818;color:#c9c3cb}
 .sw-popup .swal2-select:focus{border-color:#7d6a80;box-shadow:none;outline:none}
 .sw-popup .swal2-select option{background:#181818;color:#c9c3cb}
 
+/* ---- Personajes ocultos (solo administradores) ---- */
+.insignia.oculto{background:#4a2f55;color:#f1ddf7}
+.aviso.oculto{background:#2a1d30;color:#c9a3d6}
+
 /* ---- Personajes ocultos: translucidos para el administrador ---- */
 .card-oculta > :not(.insignia){opacity:.4;filter:grayscale(.5);transition:opacity .15s}
 .card-oculta:hover > :not(.insignia){opacity:.75}
+
+/* ---- Carga infinita ---- */
+.centinela{text-align:center;padding:24px 0 8px}
+
+/* ---- Vista de trama y zonas ---- */
+.seccion{margin-bottom:40px}
+.trama{background:var(--card);border-radius:4px;padding:20px 22px;white-space:pre-wrap;line-height:1.7;font-size:14px;font-weight:500;color:#a29da4}
+.area-trama{min-height:320px;line-height:1.6;resize:vertical}
+.zona{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:22px;background:var(--card);border-radius:4px;padding:18px;margin-bottom:18px}
+.zona.sin-galeria{grid-template-columns:1fr}
+.zona-principal{aspect-ratio:16/10;background:#101010;border-radius:4px;overflow:hidden}
+.zona-principal img{display:block;width:100%;height:100%;object-fit:cover}
+.zona-minis{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.zona-info h3{font-size:15px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#a29da4;margin-bottom:10px}
+.zona-texto{font-size:13px;line-height:1.7;font-weight:500;color:#8f8a91;white-space:pre-wrap}
+@media(max-width:700px){.zona{grid-template-columns:1fr}}
+
+/* Murcielagos de pixeles: solo en pantallas anchas (hay margen libre) y sin 'reducir movimiento' */
+.murcielagos{display:none}
+@media (min-width:1200px) and (prefers-reduced-motion:no-preference){.murcielagos{display:block}}
+.pagina-trama main{position:relative;z-index:1}
+.murcielago{position:fixed;top:0;z-index:0;pointer-events:none;opacity:.85;animation:volar var(--dur,22s) linear var(--retraso,0s) infinite}
+.murcielago.baja{animation-direction:reverse}
+.murcielago.izq{left:calc((50vw - 500px) * var(--p,.2))}
+.murcielago.der{right:calc((50vw - 500px) * var(--p,.2))}
+.ala{position:absolute;left:0;top:0}
+.ala-a{animation:aleteo-a var(--aleteo,.5s) steps(1,end) infinite}
+.ala-b{animation:aleteo-b var(--aleteo,.5s) steps(1,end) infinite}
+@keyframes aleteo-a{0%{visibility:visible}50%,100%{visibility:hidden}}
+@keyframes aleteo-b{0%{visibility:hidden}50%,100%{visibility:visible}}
+@keyframes volar{
+  0%{transform:translate(0,105vh)}
+  20%{transform:translate(calc(var(--onda,12px) * -1),80vh)}
+  40%{transform:translate(var(--onda,12px),55vh)}
+  60%{transform:translate(calc(var(--onda,12px) * -1),30vh)}
+  80%{transform:translate(var(--onda,12px),8vh)}
+  100%{transform:translate(0,-12vh)}
+}

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+  <title>Trama</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="pagina-trama">
+  <header class="top"><h1 id="titulo">Trama</h1><nav id="nav"></nav></header>
+  <div id="murcielagos" class="murcielagos" aria-hidden="true"></div>
+  <main>
+    <div class="fila"><a class="chip" id="volver" href="grupo.html">← VOLVER AL GRUPO</a></div>
+    <p id="msg" class="msg"></p>
+
+    <section class="seccion">
+      <div class="fila">
+        <span class="etiqueta">Trama</span>
+        <button class="chip" id="btn-editar-trama" hidden>EDITAR TRAMA</button>
+      </div>
+      <div id="trama" class="trama"></div>
+    </section>
+
+    <section class="seccion">
+      <div class="fila">
+        <span class="etiqueta">Zonas</span>
+        <button class="chip" id="btn-nueva-zona" hidden>+ NUEVA ZONA</button>
+      </div>
+      <div id="zonas"></div>
+    </section>
+  </main>
+
+  <dialog id="dlg-trama" class="amplio">
+    <h2>Editar trama</h2>
+    <form id="form-trama">
+      <textarea id="t-texto" class="area-trama" placeholder="Escribe aquí la trama del grupo..."></textarea>
+      <p id="trama-error" class="error"></p>
+      <div class="botones"><button class="chip activo">GUARDAR</button><button type="button" class="chip" data-cerrar>CANCELAR</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="dlg-zona">
+    <h2 id="zona-titulo"></h2>
+    <form id="form-zona">
+      <label for="z-nombre">Nombre de la zona</label><input id="z-nombre" required>
+      <label for="z-descripcion">Información</label><textarea id="z-descripcion"></textarea>
+      <label>Imágenes (enlaces)</label>
+      <div id="z-imagenes"></div>
+      <button type="button" class="chip" id="btn-add-img">+ AÑADIR IMAGEN</button>
+      <p id="zona-error" class="error"></p>
+      <div class="botones"><button class="chip activo">GUARDAR</button><button type="button" class="chip" data-cerrar>CANCELAR</button></div>
+    </form>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/trama.js"></script>
+</body>
+</html>
