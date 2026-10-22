@@ -174,3 +174,55 @@ select.chip option{background:#181818;color:#c9c3cb}
   80%{transform:translate(var(--onda,12px),8vh)}
   100%{transform:translate(0,-12vh)}
 }
+
+/* ---- Decoracion con animales de pixeles (otras vistas) ---- */
+.decoracion{display:none}
+@media (min-width:1200px) and (prefers-reduced-motion:no-preference){.decoracion{display:block}}
+body[data-decoracion] main{position:relative;z-index:1}
+.cuadro{position:absolute;left:0;top:0;animation-delay:var(--desfase,0s)}
+.cuadro-a{animation:aleteo-a var(--aleteo,.5s) steps(1,end) infinite}
+.cuadro-b{animation:aleteo-b var(--aleteo,.5s) steps(1,end) infinite}
+.parpadea .cuadro-a{animation-name:parpadeo-a;animation-duration:var(--ciclo,6s)}
+.parpadea .cuadro-b{animation-name:parpadeo-b;animation-duration:var(--ciclo,6s)}
+@keyframes parpadeo-a{0%,93%{visibility:visible}94%,100%{visibility:hidden}}
+@keyframes parpadeo-b{0%,93%{visibility:hidden}94%,100%{visibility:visible}}
+
+.animal{position:fixed;z-index:0;pointer-events:none;opacity:.9}
+.animal.izq{left:calc((50vw - 500px) * var(--p,.2))}
+.animal.der{right:calc((50vw - 500px) * var(--p,.2))}
+.animal.volador{top:0;animation:volar var(--dur,22s) linear var(--retraso,0s) infinite}
+.animal.baja{animation-direction:reverse}
+.animal.posado{bottom:6px}
+
+/* Caminantes: recorren el margen por abajo y se dan la vuelta */
+.caminante{position:fixed;bottom:6px;z-index:0;pointer-events:none;opacity:.9;height:var(--h);width:calc(50vw - 500px - 12px)}
+.caminante.izq{left:6px}
+.caminante.der{right:6px}
+.paseo{position:absolute;top:0;left:0;width:var(--w);height:var(--h);animation:pasear var(--dur,24s) linear var(--retraso,0s) infinite}
+@keyframes pasear{
+  0%{left:0;transform:scaleX(1)}
+  48%{left:calc(100% - var(--w));transform:scaleX(1)}
+  50%{left:calc(100% - var(--w));transform:scaleX(-1)}
+  98%{left:0;transform:scaleX(-1)}
+  100%{left:0;transform:scaleX(1)}
+}
+
+/* Luciernagas */
+.animal.luz{width:3px;height:3px;background:#e8e08a;box-shadow:0 0 6px 2px rgba(232,224,138,.45);
+  animation:flotar var(--dur,9s) ease-in-out var(--retraso,0s) infinite alternate,brillo var(--brillo,3s) ease-in-out var(--retraso,0s) infinite}
+@keyframes flotar{
+  0%{transform:translate(0,0)}
+  33%{transform:translate(var(--dx,20px),calc(var(--dy,20px) * -1))}
+  66%{transform:translate(calc(var(--dx,20px) * -1),var(--dy,20px))}
+  100%{transform:translate(var(--dx,20px),var(--dy,20px))}
+}
+@keyframes brillo{0%,100%{opacity:.15}50%{opacity:1}}
+
+/* ---- Animales en el movil: por toda la pantalla, detras del contenido y mas tenues ---- */
+@media (max-width:1199px) and (prefers-reduced-motion:no-preference){
+  .decoracion,.murcielagos{display:block}
+  body[data-decoracion],body.pagina-trama{padding-bottom:44px}
+  .animal,.murcielago{opacity:.4}
+  .animal.izq,.animal.der,.murcielago.izq,.murcielago.der{left:calc((100vw - 56px) * var(--q,.2));right:auto}
+  .caminante{opacity:.55;width:calc(50vw - 9px)}
+}

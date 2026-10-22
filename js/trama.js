@@ -121,6 +121,8 @@ function crearMurcielago(lado) {
   bat.style.width = `${13 * px}px`;
   bat.style.height = `${6 * px}px`;
   bat.style.setProperty('--p', (0.04 + Math.random() * 0.36).toFixed(2));   // posicion dentro del margen
+  // Posicion en el movil (sin margenes): por toda la pantalla
+  bat.style.setProperty('--q', (lado === 'izq' ? 0.02 + Math.random() * 0.4 : 0.58 + Math.random() * 0.36).toFixed(2));
   bat.style.setProperty('--onda', `${8 + Math.floor(Math.random() * 18)}px`);
   bat.style.setProperty('--dur', `${dur.toFixed(1)}s`);
   bat.style.setProperty('--retraso', `-${(Math.random() * dur).toFixed(1)}s`);
@@ -134,7 +136,9 @@ function crearMurcielago(lado) {
   return bat;
 }
 
+// En el movil se usan menos murcielagos
+const MOVIL = matchMedia('(max-width:1199px)').matches;
 $('murcielagos').append(
-  ...['izq', 'izq', 'izq', 'der', 'der', 'der'].map(crearMurcielago));
+  ...(MOVIL ? ['izq', 'der', 'izq', 'der'] : ['izq', 'izq', 'izq', 'der', 'der', 'der']).map(crearMurcielago));
 
 cargar();
