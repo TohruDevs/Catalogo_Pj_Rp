@@ -67,3 +67,24 @@ async function cambiar(metodo, sufijo, body) {
 }
 
 iniciar();
+
+// ---------- Decoracion de epoca (activar / desactivar) ----------
+const EPOCAS = [['', 'SIN DECORACIÓN'], ['halloween', 'HALLOWEEN']];
+
+async function cargarEpoca() {
+  try {
+    const { epoca } = await api('/configuracion');
+    $('epocas').replaceChildren(...EPOCAS.map(([valor, texto]) =>
+      el('button', { class: 'chip' + ((epoca || '') === valor ? ' activo' : ''), onclick: () => cambiarEpoca(valor) }, texto)));
+  } catch (e) { $('msg').textContent = e.message; }
+}
+
+async function cambiarEpoca(valor) {
+  try {
+    await api('/configuracion/epoca', { method: 'PUT', body: { epoca: valor || null } });
+    sessionStorage.setItem('epoca', valor || 'ninguna');
+    location.reload();   // aplica la decoracion al instante
+  } catch (e) { avisarError(e.message); }
+}
+
+cargarEpoca();

@@ -226,3 +226,23 @@ body[data-decoracion] main{position:relative;z-index:1}
   .animal.izq,.animal.der,.murcielago.izq,.murcielago.der{left:calc((100vw - 56px) * var(--q,.2));right:auto}
   .caminante{opacity:.55;width:calc(50vw - 9px)}
 }
+
+/* ---- Decoracion por epoca: Halloween ---- */
+body.epoca-halloween{--acento:#c8651b;--acento-t:#fff1df}
+.epoca-halloween .top h1{color:#9a5a24}
+.epoca-halloween main{position:relative;z-index:1}
+.epoca-halloween .sw-btn.sw-ok{background:#c8651b;color:#fff1df}
+.epoca-halloween .sw-popup .swal2-title.sw-titulo{color:#e0883a}
+.epoca-halloween .sw-popup .swal2-input:focus,.epoca-halloween .sw-popup .swal2-select:focus{border-color:#c8651b}
+.cuadro-fijo{position:absolute;left:0;top:0}
+.telarana{position:fixed;top:0;z-index:0;pointer-events:none;opacity:.35}
+.telarana.izq{left:0}
+.telarana.der{right:0}
+.animal.fantasma{opacity:.55}
+.animal.arana{animation:descender var(--dur,8s) ease-in-out var(--retraso,0s) infinite alternate}
+.hilo{position:absolute;top:0;width:1px;background:rgba(210,200,225,.35)}
+.cuerpo-arana{position:absolute;left:0}
+@keyframes descender{0%{transform:translateY(0)}100%{transform:translateY(var(--baja,100px))}}
+@media (max-width:1199px) and (prefers-reduced-motion:no-preference){
+  .animal.fantasma{opacity:.3}
+}
