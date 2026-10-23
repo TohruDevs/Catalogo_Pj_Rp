@@ -69,7 +69,14 @@ async function cambiar(metodo, sufijo, body) {
 iniciar();
 
 // ---------- Decoracion de epoca (activar / desactivar) ----------
-const EPOCAS = [['', 'SIN DECORACIÓN'], ['halloween', 'HALLOWEEN'], ['navidad', 'NAVIDAD'], ['genshin', 'GENSHIN IMPACT']];
+// El boton 'SIN DECORACIÓN' (valor '') desactiva la decoracion activa.
+const EPOCAS = [
+  ['', 'SIN DECORACIÓN'],
+  ['halloween', 'HALLOWEEN'],
+  ['navidad', 'NAVIDAD'],
+  ['genshin', 'GENSHIN IMPACT'],
+  ['demonslayer', 'DEMON SLAYER'],
+];
 
 async function cargarEpoca() {
   try {

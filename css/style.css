@@ -274,3 +274,15 @@ body.epoca-genshin{--acento:#b8923a;--acento-t:#fff6dc}
 .epoca-genshin .sw-popup .swal2-title.sw-titulo{color:#e0c070}
 .epoca-genshin .sw-popup .swal2-input:focus,.epoca-genshin .sw-popup .swal2-select:focus{border-color:#b8923a}
 .estrella .cuadro-fijo{animation:brillo var(--brillo,2.5s) ease-in-out var(--desfase,0s) infinite}
+
+/* ---- Decoracion por epoca: Demon Slayer (dibujos propios inspirados en la tematica) ---- */
+body.epoca-demonslayer{--acento:#3a8a62;--acento-t:#e6f6ec}
+.epoca-demonslayer .top h1{color:#4a7a5a}
+.epoca-demonslayer main{position:relative;z-index:1}
+.epoca-demonslayer .sw-btn.sw-ok{background:#3a8a62;color:#e6f6ec}
+.epoca-demonslayer .sw-popup .swal2-title.sw-titulo{color:#6ac08a}
+.epoca-demonslayer .sw-popup .swal2-input:focus,.epoca-demonslayer .sw-popup .swal2-select:focus{border-color:#3a8a62}
+.animal.petalo{opacity:.75}
+@media (max-width:1199px) and (prefers-reduced-motion:no-preference){
+  .animal.petalo{opacity:.45}
+}
