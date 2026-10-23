@@ -69,7 +69,7 @@ async function cambiar(metodo, sufijo, body) {
 iniciar();
 
 // ---------- Decoracion de epoca (activar / desactivar) ----------
-const EPOCAS = [['', 'SIN DECORACIÓN'], ['halloween', 'HALLOWEEN'], ['navidad', 'NAVIDAD']];
+const EPOCAS = [['', 'SIN DECORACIÓN'], ['halloween', 'HALLOWEEN'], ['navidad', 'NAVIDAD'], ['genshin', 'GENSHIN IMPACT']];
 
 async function cargarEpoca() {
   try {

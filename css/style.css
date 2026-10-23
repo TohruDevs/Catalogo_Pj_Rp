@@ -265,3 +265,12 @@ body.epoca-navidad{--acento:#b83a3a;--acento-t:#ffecec}
   .animal.copo{opacity:.5}
   .guirnalda{opacity:.7}
 }
+
+/* ---- Decoracion por epoca: Genshin Impact (dibujos propios inspirados en la tematica) ---- */
+body.epoca-genshin{--acento:#b8923a;--acento-t:#fff6dc}
+.epoca-genshin .top h1{color:#9a8650}
+.epoca-genshin main{position:relative;z-index:1}
+.epoca-genshin .sw-btn.sw-ok{background:#b8923a;color:#fff6dc}
+.epoca-genshin .sw-popup .swal2-title.sw-titulo{color:#e0c070}
+.epoca-genshin .sw-popup .swal2-input:focus,.epoca-genshin .sw-popup .swal2-select:focus{border-color:#b8923a}
+.estrella .cuadro-fijo{animation:brillo var(--brillo,2.5s) ease-in-out var(--desfase,0s) infinite}
