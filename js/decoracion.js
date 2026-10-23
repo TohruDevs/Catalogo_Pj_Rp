@@ -5,7 +5,7 @@
   const pedidos = (document.body.dataset.decoracion || '').split(',').map((s) => s.trim()).filter(Boolean);
 
   // ---------- Epoca activa ----------
-  const CLASES_EPOCA = { halloween: 'epoca-halloween' };
+  const CLASES_EPOCA = { halloween: 'epoca-halloween', navidad: 'epoca-navidad' };
 
   async function consultarEpoca() {
     try {
@@ -36,7 +36,7 @@
   const posQ = (lado) => (lado === 'izq' ? aleat(0.02, 0.42) : aleat(0.58, 0.94)).toFixed(2);
 
   // Dibujos: cada letra es un pixel (el punto es transparente). Dos cuadros por animal.
-  const SPRITES = {"ave": [["#.........#", "##.......##", ".##..#..##.", "..###o###..", "....###....", ".....#....."], ["....###....", "###.#o#.###", "####.#.####", "##..###..##", "#....#....#", ".....#....."]], "mariposa": [["##..b..##", "###.b.###", "####b####", "###.b.###", ".##.b.##.", "..#.b.#.."], ["....b....", "...#b#...", "...#b#...", "...#b#...", "....b....", "....b...."]], "gato": [["#........#..#.", "#........####.", ".#.......##e#.", "..##########..", "..#########...", "..#########...", "..#..#...#..#.", "..#..#...#..#."], [".#.......#..#.", "#........####.", ".#.......##e#.", "..##########..", "..#########...", "..#########...", "...##.....##..", "...##.....##.."]], "buho": [[".#.......#.", ".#########.", "##eee#eee##", "##eke#eke##", "##eeebeee##", "###########", ".#########.", ".##.###.##.", "..##...##.."], [".#.......#.", ".#########.", "###########", "##eee#eee##", "#####b#####", "###########", ".#########.", ".##.###.##.", "..##...##.."]], "calabaza": [[".....s.....", "...#####...", ".#########.", "##yy###yy##", "##yy###yy##", "###########", "#yy#yyy#yy#", ".#########.", "..#######.."], [".....s.....", "...#####...", ".#########.", "##dd###dd##", "##dd###dd##", "###########", "#dd#ddd#dd#", ".#########.", "..#######.."]], "fantasma": [["..#####..", ".#######.", "#########", "##kk#kk##", "##kk#kk##", "####k####", "#########", "#########", "#.#.#.#.#"], ["..#####..", ".#######.", "#########", "##kk#kk##", "##kk#kk##", "####k####", "#########", "#########", ".#.#.#.#."]], "arana": [[".#.....#.", "#..###..#", "#.#####.#", ".#.#r#.#.", "#..###..#", ".#.....#."], ["#.......#", ".#.###.#.", "#.#####.#", ".#.#r#.#.", ".#.###.#.", "#.......#"]], "murcielago": [["#....#.#....#", "##..#####..##", "###.#e#e#.###", "####.###.####", ".###..#..###.", "..#...#...#.."], [".....#.#.....", "#...#####...#", "##..#e#e#..##", "###.#####.###", ".###.###.###.", "..##..#..##.."]], "telarana": [["################", "####.#...#...#..", "###.###..#...#..", "##.##.####...#..", "#.###...#####...", "###..#.##..###..", "#.##..##...##.#.", "#..#.###...#....", "#..###..#.#.....", "#####....##.....", "#...#...###.....", "#...####........", "#...###.........", "####.#..........", "#.....#.........", "#..............."]]};
+  const SPRITES = {"ave": [["#.........#", "##.......##", ".##..#..##.", "..###o###..", "....###....", ".....#....."], ["....###....", "###.#o#.###", "####.#.####", "##..###..##", "#....#....#", ".....#....."]], "mariposa": [["##..b..##", "###.b.###", "####b####", "###.b.###", ".##.b.##.", "..#.b.#.."], ["....b....", "...#b#...", "...#b#...", "...#b#...", "....b....", "....b...."]], "gato": [["#........#..#.", "#........####.", ".#.......##e#.", "..##########..", "..#########...", "..#########...", "..#..#...#..#.", "..#..#...#..#."], [".#.......#..#.", "#........####.", ".#.......##e#.", "..##########..", "..#########...", "..#########...", "...##.....##..", "...##.....##.."]], "buho": [[".#.......#.", ".#########.", "##eee#eee##", "##eke#eke##", "##eeebeee##", "###########", ".#########.", ".##.###.##.", "..##...##.."], [".#.......#.", ".#########.", "###########", "##eee#eee##", "#####b#####", "###########", ".#########.", ".##.###.##.", "..##...##.."]], "calabaza": [[".....s.....", "...#####...", ".#########.", "##yy###yy##", "##yy###yy##", "###########", "#yy#yyy#yy#", ".#########.", "..#######.."], [".....s.....", "...#####...", ".#########.", "##dd###dd##", "##dd###dd##", "###########", "#dd#ddd#dd#", ".#########.", "..#######.."]], "fantasma": [["..#####..", ".#######.", "#########", "##kk#kk##", "##kk#kk##", "####k####", "#########", "#########", "#.#.#.#.#"], ["..#####..", ".#######.", "#########", "##kk#kk##", "##kk#kk##", "####k####", "#########", "#########", ".#.#.#.#."]], "arana": [[".#.....#.", "#..###..#", "#.#####.#", ".#.#r#.#.", "#..###..#", ".#.....#."], ["#.......#", ".#.###.#.", "#.#####.#", ".#.#r#.#.", ".#.###.#.", "#.......#"]], "murcielago": [["#....#.#....#", "##..#####..##", "###.#e#e#.###", "####.###.####", ".###..#..###.", "..#...#...#.."], [".....#.#.....", "#...#####...#", "##..#e#e#..##", "###.#####.###", ".###.###.###.", "..##..#..##.."]], "telarana": [["################", "####.#...#...#..", "###.###..#...#..", "##.##.####...#..", "#.###...#####...", "###..#.##..###..", "#.##..##...##.#.", "#..#.###...#....", "#..###..#.#.....", "#####....##.....", "#...#...###.....", "#...####........", "#...###.........", "####.#..........", "#.....#.........", "#..............."]], "arbol": [[".....y.....", "....###....", "...##r##...", "..#######..", "..###u###..", ".#########.", ".##o#####r.", "###########", "##r######u#", "###########", "....ttt....", "....ttt...."], [".....y.....", "....###....", "...##u##...", "..#######..", "..###r###..", ".#########.", ".##o#####u.", "###########", "##u######r#", "###########", "....ttt....", "....ttt...."]], "muneco": [["...hhh...", "...hhh...", "..hhhhh..", "..wwwww..", "..wkwkw..", "..wwoww..", ".ccccccc.", "swwwwwwws", ".wwwkwww.", "wwwwwwwww", "wwwwkwwww", "wwwwwwwww", ".wwwwwww."], ["...hhh...", "...hhh...", "..hhhhh..", "..wwwww..", "..wkwkw..", "..wwoww..", "scccccccs", ".wwwwwww.", ".wwwkwww.", "wwwwwwwww", "wwwwkwwww", "wwwwwwwww", ".wwwwwww."]], "copo": [[".#.", "###", ".#."]]};
 
   // Cada pixel del dibujo es una sombra de una caja de 1 pixel
   function sombras(filas, px, colores) {
@@ -96,13 +96,14 @@
   function posar(lado, frames, colores, o) {
     const px = entre(...o.px), ciclo = aleat(...(o.ciclo || [4, 8]));
     const [w, h] = medidas(frames, px);
-    const a = el('div', { class: `animal posado parpadea ${lado}` });
+    const a = el('div', { class: `animal posado ${o.alterna ? '' : 'parpadea '}${lado}` });
     a.style.width = `${w}px`;
     a.style.height = `${h}px`;
     a.style.setProperty('--p', aleat(0.05, 0.4).toFixed(2));
     a.style.setProperty('--q', posQ(lado));
     a.style.setProperty('--ciclo', `${ciclo.toFixed(1)}s`);
     a.style.setProperty('--desfase', `-${aleat(0, ciclo).toFixed(1)}s`);
+    if (o.alterna) a.style.setProperty('--aleteo', `${aleat(0.7, 1.1).toFixed(2)}s`);   // alterna los dos cuadros sin parpadear
     cuadros(a, frames, colores, px);
     return a;
   }
@@ -195,10 +196,49 @@
     ];
   }
 
+  // ---------- Navidad: reemplaza a los animales de la vista ----------
+  // Copos de nieve que caen con un poco de vaiven
+  function nevar(lado) {
+    const px = entre(1, 2), dur = aleat(10, 20);
+    const filas = SPRITES.copo[0];
+    const c = el('div', { class: `animal volador baja copo ${lado}` });
+    c.style.width = c.style.height = `${filas.length * px}px`;
+    c.style.setProperty('--p', aleat(0.04, 0.4).toFixed(2));
+    c.style.setProperty('--q', posQ(lado));
+    c.style.setProperty('--onda', `${entre(6, 20)}px`);
+    c.style.setProperty('--dur', `${dur.toFixed(1)}s`);
+    c.style.setProperty('--retraso', `-${aleat(0, dur).toFixed(1)}s`);
+    const celda = el('div', { class: 'cuadro-fijo' });
+    celda.style.width = celda.style.height = `${px}px`;
+    celda.style.boxShadow = sombras(filas, px, { '#': '#ffffff' });
+    c.append(celda);
+    return c;
+  }
+
+  // Guirnalda de luces en el borde de arriba, que cambian de color
+  function guirnalda() {
+    const g = el('div', { class: 'guirnalda' });
+    g.append(el('div', { class: 'luces luces-a' }), el('div', { class: 'luces luces-b' }));
+    return g;
+  }
+
+  function navidad() {
+    return [
+      guirnalda(),
+      ...lados(movil ? 3 : 5).map(nevar),
+      posar('izq', SPRITES.arbol,
+        { '#': '#2f8a4a', y: '#ffe27a', r: '#e04a4a', u: '#5aa0ff', o: '#ffd24a', t: '#7a4a2a' }, { px: [3, 4], alterna: true }),
+      posar('der', SPRITES.muneco,
+        { h: '#4a4a5a', w: '#f4f7fb', k: '#2a2a3a', o: '#f08a2e', c: '#e04a4a', s: '#8a5a2a' }, { px: [3, 4], alterna: true }),
+    ];
+  }
+
   const cont = el('div', { class: 'decoracion', 'aria-hidden': 'true' });
   document.body.append(cont);
   if (epoca === 'halloween') {
     cont.append(...halloween());
+  } else if (epoca === 'navidad') {
+    cont.append(...navidad());
   } else {
     pedidos.forEach((p) => {
       const [nombre, n] = p.split(':');
